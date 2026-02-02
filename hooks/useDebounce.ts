@@ -1,36 +1,28 @@
 import { useState, useEffect, useRef } from "react";
 
-export function useDebounce<T>(value: T, delay: number): T {
+/**
+ * Debounces value changes by specified delay
+ * @param value - Value to debounce
+ * @param delay - Delay in ms (default: 300)
+ * @returns Debounced value
+ */
+export function useDebounce<T>(value: T, delay: number = 300): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const mountedRef = useRef(true); // ← Prevents setState on unmount
-  const prevValueRef = useRef(value);
 
   useEffect(() => {
-    mountedRef.current = true;
-
+    // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
-    // Immediate for empty/unchanged (safe with mountedRef)
-    if (String(value) === "" || prevValueRef.current === value) {
-      if (mountedRef.current) {
-        setDebouncedValue(value);
-      }
-      prevValueRef.current = value;
-      return;
-    }
-
+    // Set new timeout
     timeoutRef.current = setTimeout(() => {
-      if (mountedRef.current) {
-        setDebouncedValue(value);
-        prevValueRef.current = value;
-      }
+      setDebouncedValue(value);
     }, delay);
 
+    // Cleanup on unmount/change
     return () => {
-      mountedRef.current = false;
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
