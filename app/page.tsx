@@ -80,6 +80,7 @@ export default function DashboardPage() {
 
         <div className="flex-1 overflow-auto p-4">
           <AssetTable 
+            key={`${sortKey}-${sortDirection}`}
             assets={filteredAndSortedAssets} 
             onSort={handleSort} 
             sortConfig={{ key: sortKey, direction: sortDirection }} 
