@@ -33,7 +33,7 @@ export function TypeFilter({ value, onChange }: TypeFilterProps) {
                    text-gray-100 text-sm focus:outline-none focus:ring-2 
                    focus:ring-blue-500 focus:border-transparent 
                    cursor-pointer transition-all hover:border-gray-500
-                   min-w-[140px] sm:min-w-[160px]"
+                   min-w-35 sm:min-w-40"
         aria-label="Filter assets by type"
       >
         {FILTER_OPTIONS.map((option) => (
