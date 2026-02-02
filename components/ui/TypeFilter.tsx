@@ -1,24 +1,15 @@
 'use client';
 
 import { AssetType } from '@/types/asset';
+import { useAssetTypeFilter } from '@/hooks/useAssetTypeFilter';
 
 interface TypeFilterProps {
-  value: AssetType | 'All';
-  onChange: (value: AssetType | 'All') => void;
+  value: AssetType;
+  onChange: (value: AssetType) => void;
 }
 
-const FILTER_OPTIONS = [
-  { value: 'All', label: 'All Assets' },
-  { value: 'Stock', label: 'Stocks' },
-  { value: 'Crypto', label: 'Cryptocurrencies' },
-  { value: 'ETF', label: 'ETFs' },
-] as const;
-
 export function TypeFilter({ value, onChange }: TypeFilterProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newValue = e.target.value as AssetType | 'All';
-    onChange(newValue);
-  };
+const { availableFilters } = useAssetTypeFilter();
 
   return (
     <div className="flex items-center gap-2">
@@ -28,7 +19,7 @@ export function TypeFilter({ value, onChange }: TypeFilterProps) {
       <select
         id="type-filter"
         value={value}
-        onChange={handleChange}
+        onChange={(e) => onChange(e.target.value as AssetType)}
         className="px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg 
                    text-gray-100 text-sm focus:outline-none focus:ring-2 
                    focus:ring-blue-500 focus:border-transparent 
@@ -36,7 +27,7 @@ export function TypeFilter({ value, onChange }: TypeFilterProps) {
                    min-w-35 sm:min-w-40"
         aria-label="Filter assets by type"
       >
-        {FILTER_OPTIONS.map((option) => (
+        {availableFilters.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
