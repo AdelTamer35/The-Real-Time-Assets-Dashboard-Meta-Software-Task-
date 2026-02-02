@@ -1,56 +1,22 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
 import { AssetTable } from '@/components/ui/AssetTable';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { TypeFilter } from '@/components/ui/TypeFilter';
-import { INITIAL_ASSETS } from '@/data/initialAssets';
-import type { Asset, AssetType } from '@/types/asset';
-import { sortAssets } from '@/lib/utils';
+import { usePortfolioDashboard } from '@/hooks/usePortfolioDashboard';
 
 export default function DashboardPage() {
-  const [assets, setAssets] = useState(INITIAL_ASSETS);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<AssetType | 'All'>('All');
-  const [sortKey, setSortKey] = useState<keyof Asset>('value');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-
-  // Real-time mock data updates (every 8s)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAssets(prev => 
-        prev.map(asset => {
-          const change = (Math.random() - 0.5) * 0.02;
-          const newPrice = asset.price * (1 + change);
-          return {
-            ...asset,
-            price: parseFloat(newPrice.toFixed(2)),
-            changePct: parseFloat((change * 100).toFixed(1)),
-            value: parseFloat((asset.quantity * newPrice).toFixed(2)),
-          };
-        })
-      );
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Efficient filtering + sorting pipeline
-  const filteredAndSortedAssets = useMemo(() => {
-    return assets
-      .filter(asset => 
-        (asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-         asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        (filterType === 'All' || asset.type === filterType)
-      )
-      .sort((a, b) => sortAssets(a, b, sortKey, sortDirection));
-  }, [assets, searchTerm, filterType, sortKey, sortDirection]);
-
-  const handleSort = useCallback((newKey: keyof Asset) => {
-    setSortDirection(prevDir => 
-      sortKey === newKey && prevDir === 'asc' ? 'desc' : 'asc'
-    );
-    setSortKey(newKey);
-  }, [sortKey]);
+  const {
+    filteredAndSortedAssets,
+    filterType,
+    sortKey,
+    sortDirection,
+    totalMatchingAssets,
+    
+    handleSearchQueryChange,
+    handleAssetTypeFilterChange,
+    handleColumnSort,
+  } = usePortfolioDashboard();
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col md:flex-row">
@@ -70,10 +36,10 @@ export default function DashboardPage() {
         <header className="bg-gray-800/50 border-b border-gray-700 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <h2 className="text-lg font-semibold text-blue-300">Real-Time Portfolio</h2>
           <div className="flex flex-wrap items-center gap-3">
-            <SearchInput onSearch={setSearchTerm} />
-            <TypeFilter value={filterType} onChange={setFilterType} />
+            <SearchInput onSearch={handleSearchQueryChange} />
+            <TypeFilter value={filterType} onChange={handleAssetTypeFilterChange} />
             <div className="text-sm text-gray-400 min-w-max">
-              {filteredAndSortedAssets.length} asset{filteredAndSortedAssets.length !== 1 ? 's' : ''}
+              {totalMatchingAssets} asset{totalMatchingAssets !== 1 ? 's' : ''}
             </div>
           </div>
         </header>
@@ -82,7 +48,7 @@ export default function DashboardPage() {
           <AssetTable 
             key={`${sortKey}-${sortDirection}`}
             assets={filteredAndSortedAssets} 
-            onSort={handleSort} 
+            onSort={handleColumnSort} 
             sortConfig={{ key: sortKey, direction: sortDirection }} 
           />
         </div>
