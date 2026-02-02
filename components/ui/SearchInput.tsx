@@ -1,22 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useEffect } from 'react';
+import { useSearchInput } from '@/hooks/useSearchInput';
 
 interface SearchInputProps {
   onSearch: (term: string) => void;
 }
 
 export function SearchInput({ onSearch }: SearchInputProps) {
-  const [inputValue, setInputValue] = useState('');
-  const debouncedValue = useDebounce(inputValue, 300);
 
-  // Direct callback - no extra effect
+ const {
+    inputValue,
+    debouncedValue,
+    isSearching,
+    updateSearchTerm,
+  } = useSearchInput();
+
   useEffect(() => {
     onSearch(debouncedValue);
   }, [debouncedValue, onSearch]);
-
-  const isSearching = inputValue !== debouncedValue && inputValue !== '';
 
   return (
     <div className="relative">
@@ -24,7 +26,7 @@ export function SearchInput({ onSearch }: SearchInputProps) {
         type="text"
         placeholder="Search assets..."
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={(e) => updateSearchTerm(e.target.value)}
         className="w-full sm:w-64 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg 
                    text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 
                    focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-10"

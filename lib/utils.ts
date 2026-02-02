@@ -1,29 +1,34 @@
 import type { Asset } from "@/types/asset";
 
 /**
- * Sort assets by a given key and direction
+ * Compare two assets for sorting by specified key and direction
+ * Handles numbers (price, value) and strings (name, symbol) intelligently
  */
-export function sortAssets(
-  a: Asset,
-  b: Asset,
-  key: keyof Asset,
-  direction: "asc" | "desc",
+export function sortAssetsByKey(
+  firstAsset: Asset,
+  secondAsset: Asset,
+  sortKey: keyof Asset,
+  sortDirection: "asc" | "desc",
 ): number {
-  const aValue = a[key];
-  const bValue = b[key];
+  const firstValue = firstAsset[sortKey];
+  const secondValue = secondAsset[sortKey];
 
-  // Handle numbers
-  if (typeof aValue === "number" && typeof bValue === "number") {
-    return direction === "asc" ? aValue - bValue : bValue - aValue;
+  // Numeric comparison (price, quantity, value, changePct)
+  if (typeof firstValue === "number" && typeof secondValue === "number") {
+    const numericDifference = firstValue - secondValue;
+    return sortDirection === "asc" ? numericDifference : -numericDifference;
   }
 
-  // Handle strings (case-insensitive)
-  if (typeof aValue === "string" && typeof bValue === "string") {
-    return direction === "asc"
-      ? aValue.localeCompare(bValue, "en", { sensitivity: "base" })
-      : bValue.localeCompare(aValue, "en", { sensitivity: "base" });
+  // String comparison (name, symbol, type) - case-insensitive
+  if (typeof firstValue === "string" && typeof secondValue === "string") {
+    const stringComparison = firstValue.localeCompare(
+      secondValue,
+      "en",
+      { sensitivity: "base" }, // Ignore case, accents, diacritics
+    );
+    return sortDirection === "asc" ? stringComparison : -stringComparison;
   }
 
-  // Fallback for other types
+  // Stable fallback for unhandled types
   return 0;
 }
