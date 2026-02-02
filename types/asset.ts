@@ -9,4 +9,4 @@ export interface Asset {
   value: number;
 }
 
-export type AssetType = "Stock" | "Crypto" | "ETF";
+export type AssetType = "All" | "Stock" | "Crypto" | "ETF";
